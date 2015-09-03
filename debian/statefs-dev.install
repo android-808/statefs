@@ -1,0 +1,5 @@
+debian/tmp/usr/include/statefs/config.hpp
+debian/tmp/usr/include/statefs/util.hpp
+debian/tmp/usr/include/statefs/consumer.hpp
+debian/tmp/usr/lib/pkgconfig/statefs-util.pc
+

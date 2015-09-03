@@ -1,0 +1,16 @@
+---
+ examples/src/CMakeLists.txt |    3 +++
+ 1 file changed, 3 insertions(+)
+
+--- a/examples/src/CMakeLists.txt
++++ b/examples/src/CMakeLists.txt
+@@ -9,6 +9,9 @@
+ 
+ add_library(example_statefspp SHARED example_statefspp.cpp)
+ target_link_libraries(example_statefspp statefs-pp)
++if (DEFINED CMAKE_THREAD_LIBS_INIT)
++target_link_libraries(example_statefspp ${CMAKE_THREAD_LIBS_INIT})
++endif() 
+ install(TARGETS example_statefspp DESTINATION ${DST_LIB}/statefs)
+ 
+ set(POWER_SRC basic.c)

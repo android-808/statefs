@@ -1,0 +1,59 @@
+Source: statefs
+Maintainer: Robert Irvin <android_808@hotmail.com>
+Section: misc
+Priority: optional
+Standards-Version: 3.9.2
+Build-Depends: debhelper (>= 9), libfuse-dev (>=2.9.0), libboost-filesystem-dev, libboost-dev, cmake (>=2.8), check, doxygen, cor-dev (>=0.1.17), libsystemd-dev, graphviz
+
+Package: statefs
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}
+Description: Syntetic filesystem to expose system state
+ StateFS is the syntetic filesystem to expose current system state
+ provided by StateFS plugins as properties wrapped into namespaces.
+
+Package: statefs-pp
+Architecture: any
+Section: libs
+Depends: ${shlibs:Depends}
+Description: Statefs framework for C++ providers
+ Statefs framework to be used to write providers in C++
+
+Package: statefs-dev
+Architecture: any
+Section: libdevel
+Depends: statefs(= ${source:Version}), cor-dev (>=0.1.17)
+Description: Files to develop statefs clients and providers
+ Headers, libraries etc. needed to develop statefs clients and providers
+
+Package: statefs-provider-dev
+Architecture: any
+Section: libdevel
+Depends: statefs-pp (= ${source:Version}), cor-dev (>=0.1.17), statefs-dev (= ${source:Version})
+Description: Files to develop statefs providers
+ Headers, libraries etc. needed to develop statefs providers
+
+Package: statefs-doc
+Architecture: any
+Section: docs
+Depends: statefs (= ${source:Version})
+Description: Statefs developer documentation
+
+Package: statefs-examples
+Architecture: any
+Section: libdevel
+Depends: statefs (= ${source:Version})
+Description: Statefs provider examples
+
+Package: statefs-tests
+Architecture: any
+Section: misc
+Depends: statefs (= ${source:Version}), python (>= 2.7)
+Description: Tests for statefs
+
+Package: statefs-change-notifier
+Architecture: any
+Section: misc
+Depends: statefs (= ${source:Version})
+Description: StateFS property change notifier

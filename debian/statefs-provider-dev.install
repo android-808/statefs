@@ -1,0 +1,8 @@
+debian/tmp/usr/include/statefs/util.h
+debian/tmp/usr/include/statefs/loader.hpp
+debian/tmp/usr/include/statefs/property.hpp
+debian/tmp/usr/include/statefs/provider.h
+debian/tmp/usr/include/statefs/provider.hpp
+debian/tmp/usr/lib/pkgconfig/statefs.pc
+debian/tmp/usr/lib/pkgconfig/statefs-cpp.pc
+

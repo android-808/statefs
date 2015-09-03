@@ -1,0 +1,130 @@
+---
+ packaging/install-provider.in |    8 ++++----
+ packaging/loader-action.in    |    8 ++++----
+ packaging/once                |    2 +-
+ packaging/provider-action.in  |    4 ++--
+ packaging/provider-do.in      |    6 +++---
+ packaging/statefs-prerun      |    6 +++---
+ 6 files changed, 17 insertions(+), 17 deletions(-)
+
+--- a/packaging/statefs-prerun
++++ b/packaging/statefs-prerun
+@@ -2,7 +2,7 @@
+ uid=`id -u`
+ mount_dir=/run/user/$uid/state
+ cfg_dir=/var/lib/statefs
+-if [ "x$uid" == "x0" ]; then
++if [ "x$uid" = "x0" ]; then
+     mount_dir=/run/state
+     cfg_dir=/var/lib/statefs/system
+ fi
+@@ -17,9 +17,9 @@
+ fi
+ 
+ hooks_dir=$cfg_dir/hooks
+-if [[ -d "$hooks_dir" ]]; then
++if [ -d "$hooks_dir" ]; then
+     for hook in `find $hooks_dir/ -name 'prestart*'`; do
+-        if [[ -x "$hook" ]]; then
++        if [ -x "$hook" ]; then
+             echo "Prestart hook $hook"
+             exec "$hook"
+         else
+--- a/packaging/provider-do.in
++++ b/packaging/provider-do.in
+@@ -11,7 +11,7 @@
+ stype=$4
+ params=
+ 
+-if [ "$stype" == "system" ]; then
++if [ "$stype" = "system" ]; then
+     params="--system";
+ fi
+ 
+@@ -20,9 +20,9 @@
+ loader_dir=$scripts_dir/$provider_type
+ script_name=$loader_dir/on-$group_name
+ 
+-if [ "$cmd" == "register" ]; then
++if [ "$cmd" = "register" ]; then
+     order=03
+-    if [ "$provider_type" == "loader" ]; then
++    if [ "$provider_type" = "loader" ]; then
+         order=02
+     fi
+     # add-oneshot is used only if there is oneshot available,
+--- a/packaging/provider-action.in
++++ b/packaging/provider-action.in
+@@ -49,9 +49,9 @@
+             type=$3;
+             shift 3;
+             if [ $# -eq 1 ]; then
+-                if [ "$1" == "system" ]; then
++                if [ "$1" = "system" ]; then
+                     params=--system;
+-                elif [ "$1" == "user" ]; then
++                elif [ "$1" = "user" ]; then
+                     params=;
+                 fi
+             elif [ $# -gt 1 ]; then
+--- a/packaging/once
++++ b/packaging/once
+@@ -22,7 +22,7 @@
+ 
+ res=0
+ 
+-function exec_once {
++exec_once {
+     cmd=$1
+     sh $cmd
+     if [ $? -eq 0 ]; then
+--- a/packaging/install-provider.in
++++ b/packaging/install-provider.in
+@@ -11,7 +11,7 @@
+ stype=$4
+ params=
+ 
+-if [ "$stype" == "system" ]; then
++if [ "$stype" = "system" ]; then
+     params="--system";
+ fi
+ 
+@@ -29,14 +29,14 @@
+ fi
+ 
+ order=03
+-if [ "$provider_type" == "loader" ]; then
++if [ "$provider_type" = "loader" ]; then
+     order=02
+     action_script=$lib_dir/loader-action
+-    echo "$action_script \$1 $provider_path \${@:2}" \
++    echo "$action_script \$1 $provider_path \${( echo \${@} | awk '{ string=substr(\$0, index(\$0,\$2)); print string; }' )}" \
+         >> $script_file
+ else
+     action_script=$lib_dir/provider-action
+-    echo "$action_script \$1 $provider_path $provider_type $params \${@:2}" \
++    echo "$action_script \$1 $provider_path $provider_type $params \${( echo \${@} | awk '{ string=substr(\$0, index(\$0,\$2)); print string; }' )}" \
+         >> $script_file
+ fi
+ 
+--- a/packaging/loader-action.in
++++ b/packaging/loader-action.in
+@@ -7,14 +7,14 @@
+ action=$1
+ loader_path=$2
+ 
+-loader_type=$(statefs $action $loader_path --statefs-type=loader ${@:2} | cut -d '-' -f 2)
+-if [ "x$loader_type" == "x" ]; then
++loader_type=$(statefs $action $loader_path --statefs-type=loader ${( echo \${@} | awk '{ string=substr(\$0, index(\$0,\$2)); print string; }' )} | cut -d '-' -f 2)
++if [ "x$loader_type" = "x" ]; then
+     echo "Loader ($loader_path) should return its type"
+     exit 1
+ fi
+ 
+-loader_type=$(statefs $action $loader_path --statefs-type=loader --system ${@:2} | cut -d '-' -f 2)
+-if [ "x$loader_type" == "x" ]; then
++loader_type=$(statefs $action $loader_path --statefs-type=loader --system ${( echo \${@} | awk '{ string=substr(\$0, index(\$0,\$2)); print string; }' )} | cut -d '-' -f 2)
++if [ "x$loader_type" = "x" ]; then
+     echo "Loader ($loader_path) should return its type"
+     exit 1
+ fi

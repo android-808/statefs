@@ -1,0 +1,59 @@
+#!/usr/bin/make -f
+# -*- makefile -*-
+# Sample debian/rules that uses debhelper.
+# This file was originally written by Joey Hess and Craig Small.
+# As a special exception, when this file is copied by dh-make into a
+# dh-make output file, you may use that output file without restriction.
+# This special exception was added by Craig Small in version 0.37 of dh-make.
+
+# Uncomment this to turn on verbose mode.
+#export DH_VERBOSE=1
+
+VERSION := $$(dpkg-parsechangelog | sed -n 's/^Version: //p')
+STATEFS_UMASK := $$(umask)
+STATEFS_GROUP = privileged
+
+%:
+	dh $@ --buildsystem=cmake --with quilt
+
+override_dh_auto_clean:
+	dh_auto_clean
+	rm -rf build-statefs
+	rm -f debian/statefs.install
+	rm -f debian/statefs-examples.install
+
+override_dh_auto_configure:
+	dh_auto_configure -- -DVERSION=$(VERSION) -DSTATEFS_GROUP=$(STATEFS_GROUP) -DSTATEFS_UMASK=$(STATEFS_UMASK) -DSYSTEMD_UNIT_DIR=/lib/systemd/system -DENABLE_USER_SESSION=ON -DSYSTEMD_USER_UNIT_DIR=/usr/lib/systemd/user -DSYS_CONFIG_DIR=/etc/statefs -DENABLE_ONESHOT=ON -DCMAKE_INSTALL_PREFIX:PATH=/usr
+	{ (awk '!seen[$$0]++' default.files | awk '{print "debian/tmp" $$0}' ) ; cat debian/statefs.install.in ; } > debian/statefs.install
+	{ (awk '!seen[$$0]++' examples.files | awk '{print "debian/tmp" $$0}' ) ; cat debian/statefs-examples.install.in ; } > debian/statefs-examples.install
+
+override_dh_auto_build:
+	dh_auto_build
+	make -C build-statefs doc
+
+override_dh_auto_install:
+	dh_auto_install
+
+	ln -sf /usr/bin/statefs-watch /debian/tmp/usr/bin/statefs-change-notifier
+
+	mv debian/tmp/lib/systemd/system/statefs-system.service debian/tmp/lib/systemd/system/statefs.service
+
+	mkdir -p debian/tmp/usr/lib/systemd/user/pre-user-session.target.wants
+	ln -sf ../statefs.service debian/tmp/usr/lib/systemd/user/pre-user-session.target.wants/
+
+	mkdir -p debian/tmp/lib/systemd/system/multi-user.target.wants
+	ln -sf ../statefs.service debian/tmp/lib/systemd/system/multi-user.target.wants/
+	mkdir -p debian/tmp/lib/systemd/system/actdead-pre.target.wants
+	ln -sf ../statefs.service debian/tmp/lib/systemd/system/actdead-pre.target.wants/
+
+	install -d -D -p -m755 debian/tmp/var/lib/statefs
+
+	RPM_BUILD_ROOT=./debian/tmp debian/tmp/usr/lib/statefs/install-provider loader default /usr/lib/statefs/libloader-default.so
+	RPM_BUILD_ROOT=./debian/tmp debian/tmp/usr/lib/statefs/install-provider loader default /usr/lib/statefs/libloader-inout.so
+
+	RPM_BUILD_ROOT=./debian/tmp debian/tmp/usr/lib/statefs/install-provider default examples /usr/lib/statefs/libexample_power.so
+	RPM_BUILD_ROOT=./debian/tmp debian/tmp/usr/lib/statefs/install-provider default examples /usr/lib/statefs/libexample_statefspp.so
+	RPM_BUILD_ROOT=./debian/tmp debian/tmp/usr/lib/statefs/install-provider default examples /usr/lib/statefs/libprovider_basic_example.so system
+
+	mkdir -p debian/tmp/etc/statefs
+
